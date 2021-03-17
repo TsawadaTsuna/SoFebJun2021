@@ -20,13 +20,15 @@ main(void)
   dup(0);  // stderr
 
   for(;;){
-    printf(1, "init: starting sh\n");
+    printf(1, "INICIANDO SISTEMA..........\n");
     pid = fork();
     if(pid < 0){
       printf(1, "init: fork failed\n");
       exit();
     }
     if(pid == 0){
+	  //al cambiar sh por ls empezo a correr el comando ls dentro del for infinito y estaba mostrando los archivos que contenia el S.O de manera infinita
+	  //al cambiarlo por un programa que no existe entra al error despues del exec y muestra infinitamente mensajes de error
       exec("sh", argv);
       printf(1, "init: exec sh failed\n");
       exit();

@@ -12,6 +12,10 @@ int main(){
 			count +=1;
 		}
 		
+		
+	}
+	if(minc!='\n'){
+		count+=1;
 	}
 	printf("%d/n",count);
 	return 0;

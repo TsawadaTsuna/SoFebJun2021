@@ -1,52 +1,53 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdlib.h>
+#include <string.h>
 
 int main(){
-    char fun[20];
-    float inicio,final,puntos;
-    int pah[2];
-    int hap[2];
+    int pah[2];//padre a hijo
+    int hap[2];//hijo a padre
     pipe(pah);
     pipe(hap);
     int pid = fork();
 	if(pid==0){
 		// Hijo
-        // connect pc2p to stdout
         close(pah[1]);
+        dup2(pah[0], STDIN_FILENO);
+        close(pah[0]);
         close(hap[0]);
-        //(pah[0], hap[1]);
-        FILE *in = fdopen(pah[0], "r");
-        FILE *out = fdopen(hap[1], "w");
-        char params[50];
-        fscanf(in,"%s",params);
-        printf("%s\n",params);
-		//execl("/usr/bin/bc","bc","-l",params,NULL);
-	}
-	if(pid>0){
+        dup2(hap[1], STDOUT_FILENO);
+        close(hap[1]);
+        execlp("/usr/bin/bc", "bc", "-l", NULL);
+	}else if(pid>0){
 		// Padre
 		close(pah[0]);
         close(hap[1]);
-        FILE *out = fdopen(pah[1], "w");
-        FILE *in = fdopen(hap[0], "r");
-        int sum=0;
-        
-        scanf("%s",fun);
-        printf("%s",fun);
-        scanf("%f %f %f",&inicio,&final,&puntos);
-        
-        /*
-        while(fscanf(in, "%s", fun) !=EOF){
-				printf("%s\n", fun);
-			}
-			fclose(in);
-            */
-        //fprintf(out,"x=%f\n %s\n",inicio,fun);
-        //fprintf(out,"x=%f %s",inicio,fun);
-        //fprintf(out,"%f %f",inicio,final);
+        FILE *out = fdopen(pah[1], "w");//escritura de padre a hijo
+        FILE *in = fdopen(hap[0], "r");//lectura de hijo a padre
+        char fun[100];
+		float inicio, final, actual, sum, promedio, res;
+		int puntos;
+        while(1){
+            while (scanf("%s", fun) != EOF) {
+                scanf("%f %f %d",&inicio,&final,&puntos);
+                for(int i=0;i< puntos;i++){
+                    actual = inicio+((final-inicio)/puntos)*(i+1);
+                    fprintf(out, "x=%f\n", actual);
+					fprintf(out, "%s\n", fun);
+					fflush(out);
+                    fscanf(in, "%f", &res);
+					fflush(in);
+					sum += res;
+                }
+                promedio = sum/(puntos+1);
+				printf("Promedio: %f\n", promedio);
+				sum = 0;
+				puntos=0;
+            }
+        }
+        }else{
 
-	}
-    
-    
+        }
+        return 0;
 }

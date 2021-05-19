@@ -26,11 +26,13 @@ int main(int argnum, char **argv){
     }
 
     if(S_ISDIR(sbn.st_mode)){
-        char newdir[100];
+        int len1 = strlen(oldpath);
+        int len2 = strlen(newpath);
+        char newdir[len1+len2+1];
         strcpy(newdir, newpath);
         strcat(newdir, "/");
         strcat(newdir,oldpath);
-        printf("%s \n",newdir);
+        //printf("%s \n",newdir);
         link(oldpath,newdir);
         unlink(oldpath);
     }
